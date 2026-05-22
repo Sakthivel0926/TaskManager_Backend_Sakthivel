@@ -39,14 +39,26 @@ def register_user(request):
     })
 
 
-# GET TASKS
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tasks(request):
 
-    tasks = Task.objects.all().order_by('-id')
+    # ADMIN CAN SEE ALL TASKS
+    if request.user.is_staff:
 
-    serializer = TaskSerializer(tasks, many=True)
+        tasks = Task.objects.all()
+
+    else:
+
+        # NORMAL USER SEES OWN TASKS
+        tasks = Task.objects.filter(
+            user=request.user
+        )
+
+    serializer = TaskSerializer(
+        tasks,
+        many=True
+    )
 
     return Response(serializer.data)
 
